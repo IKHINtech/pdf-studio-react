@@ -1,0 +1,167 @@
+import { useEffect, useMemo, useState } from 'react';
+import { Files, RotateCw, Save, Trash2 } from 'lucide-react';
+import { Dropzone } from './components/Dropzone';
+import { PageWorkspace } from './components/PageWorkspace';
+import { downloadBlob } from './lib/download';
+import { buildPdfFromPages, loadPdfSource, sourceToPages } from './lib/pdf';
+import type { PdfAnnotation, PdfPageItem, SourcePdf } from './types/pdf';
+import './styles.css';
+
+export default function App() {
+  const [sources, setSources] = useState<SourcePdf[]>([]);
+  const [pages, setPages] = useState<PdfPageItem[]>([]);
+  const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
+  const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
+  const [isBusy, setIsBusy] = useState(false);
+  const [status, setStatus] = useState('Upload PDF untuk mulai merge dan susun halaman.');
+
+  const totalPages = pages.length;
+  const totalFiles = sources.length;
+  const outputName = useMemo(() => {
+    if (totalFiles === 0) return 'merged.pdf';
+    const firstName = sources[0]?.name.replace(/\.pdf$/i, '') || 'merged';
+    return `${firstName}-edited.pdf`;
+  }, [sources, totalFiles]);
+
+  useEffect(() => {
+    if (pages.length === 0) {
+      setSelectedPageId(null);
+      return;
+    }
+
+    if (!selectedPageId || !pages.some((page) => page.id === selectedPageId)) {
+      setSelectedPageId(pages[0].id);
+    }
+  }, [pages, selectedPageId]);
+
+  async function addFiles(files: File[]) {
+    await appendOrInsertFiles(files, pages.length);
+  }
+
+  async function insertFilesAfter(index: number, files: File[]) {
+    await appendOrInsertFiles(files, index + 1);
+  }
+
+  async function appendOrInsertFiles(files: File[], insertAt: number) {
+    if (files.length === 0) {
+      setStatus('File yang dipilih bukan PDF.');
+      return;
+    }
+
+    setIsBusy(true);
+    setStatus(`Memproses ${files.length} PDF...`);
+
+    try {
+      const loadedSources = await Promise.all(files.map(loadPdfSource));
+      const loadedPages = loadedSources.flatMap(sourceToPages);
+      const safeIndex = Math.max(0, Math.min(insertAt, pages.length));
+
+      setSources((current) => [...current, ...loadedSources]);
+      setPages((current) => [...current.slice(0, safeIndex), ...loadedPages, ...current.slice(safeIndex)]);
+      if (loadedPages[0]) setSelectedPageId(loadedPages[0].id);
+
+      setStatus(`Berhasil menambahkan ${loadedSources.length} PDF dengan total ${loadedPages.length} halaman.`);
+    } catch (error) {
+      console.error(error);
+      setStatus('Gagal membaca PDF. Pastikan file tidak rusak atau terenkripsi.');
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  async function exportPdf() {
+    setIsBusy(true);
+    setStatus('Membuat PDF hasil...');
+
+    try {
+      const blob = await buildPdfFromPages(pages, annotations);
+      downloadBlob(blob, outputName);
+      setStatus('PDF berhasil dibuat dan di-download.');
+    } catch (error) {
+      console.error(error);
+      setStatus(error instanceof Error ? error.message : 'Gagal membuat PDF.');
+    } finally {
+      setIsBusy(false);
+    }
+  }
+
+  function clearAll() {
+    setSources([]);
+    setPages([]);
+    setSelectedPageId(null);
+    setAnnotations([]);
+    setStatus('Semua file sudah dibersihkan.');
+  }
+
+  function reverseOrder() {
+    setPages((current) => [...current].reverse());
+    setStatus('Urutan halaman dibalik.');
+  }
+
+  return (
+    <main className="app-shell">
+      <header className="hero compact-hero">
+        <div>
+          <p className="eyebrow">PDF Studio</p>
+          <h1>Editor PDF ala Canva</h1>
+          <p className="hero-copy">Fokus ke satu halaman besar, lalu susun urutan halaman dari timeline bawah. Semua proses berjalan langsung di browser.</p>
+        </div>
+        <div className="hero-card">
+          <span><Files size={20} /> {totalFiles} file</span>
+          <strong>{totalPages}</strong>
+          <small>halaman aktif</small>
+        </div>
+      </header>
+
+      <section className="workspace editor-layout">
+        <aside className="sidebar compact-sidebar">
+          <div className="panel">
+            <h2>Upload PDF</h2>
+            <Dropzone onFilesSelected={addFiles} disabled={isBusy} />
+          </div>
+
+          <div className="panel">
+            <h2>Aksi Dokumen</h2>
+            <div className="button-stack">
+              <button className="button primary" disabled={isBusy || pages.length === 0} onClick={exportPdf}>
+                <Save size={18} /> Export PDF
+              </button>
+              <button className="button" disabled={isBusy || pages.length === 0} onClick={reverseOrder}>
+                <RotateCw size={18} /> Balik Urutan
+              </button>
+              <button className="button danger" disabled={isBusy || pages.length === 0} onClick={clearAll}>
+                <Trash2 size={18} /> Bersihkan
+              </button>
+            </div>
+          </div>
+
+          <div className="status-box">
+            <strong>Status</strong>
+            <p>{status}</p>
+          </div>
+        </aside>
+
+        <section className="content-area editor-area">
+          {pages.length === 0 ? (
+            <div className="empty-state">
+              <Files size={44} />
+              <h3>Belum ada PDF</h3>
+              <p>Upload satu atau beberapa file PDF. Setelah itu editor akan menampilkan satu halaman besar dan timeline halaman di bawahnya.</p>
+            </div>
+          ) : (
+            <PageWorkspace
+              pages={pages}
+              selectedPageId={selectedPageId}
+              onSelectPage={setSelectedPageId}
+              onChange={setPages}
+              onInsertAfter={insertFilesAfter}
+              annotations={annotations}
+              onAnnotationsChange={setAnnotations}
+              disabled={isBusy}
+            />
+          )}
+        </section>
+      </section>
+    </main>
+  );
+}
