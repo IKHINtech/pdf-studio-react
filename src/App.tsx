@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Files, PanelLeftClose, PanelLeftOpen, RotateCw, Save, Trash2 } from 'lucide-react';
+import { Files, FolderOpen, PanelLeftClose, PanelLeftOpen, RotateCw, Save, Settings2, Trash2 } from 'lucide-react';
 import { Dropzone } from './components/Dropzone';
 import { PageWorkspace } from './components/PageWorkspace';
 import { downloadBlob } from './lib/download';
@@ -14,6 +14,7 @@ export default function App() {
   const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
   const [isBusy, setIsBusy] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [activeSidebarTab, setActiveSidebarTab] = useState<'file' | 'tools'>('file');
   const [status, setStatus] = useState('Upload PDF untuk mulai merge dan susun halaman.');
 
   const outputName = useMemo(() => {
@@ -146,47 +147,74 @@ export default function App() {
       <section className="workspace-shell">
         <section className={`workspace editor-layout ${isSidebarCollapsed ? 'is-sidebar-collapsed' : ''}`}>
           <aside className={`sidebar compact-sidebar ${isSidebarCollapsed ? 'is-collapsed' : ''}`}>
-            <button
-              className="sidebar-rail-toggle"
-              type="button"
-              onClick={() => setIsSidebarCollapsed((current) => !current)}
-              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            >
-              {isSidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-            </button>
-            <div className="sidebar-section">
-              <span className="sidebar-label">File</span>
-              <div className="panel sidebar-panel">
-                <h2>Upload PDF</h2>
-                <p className="sidebar-help">Tambahkan file baru ke workspace seperti panel kiri Canva.</p>
-                <Dropzone onFilesSelected={addFiles} disabled={isBusy} />
-              </div>
+            <div className="sidebar-tabs">
+              <button
+                className="sidebar-rail-toggle"
+                type="button"
+                onClick={() => setIsSidebarCollapsed((current) => !current)}
+                title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                {isSidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+              </button>
+              <button
+                className={`sidebar-tab-button ${activeSidebarTab === 'file' ? 'is-active' : ''}`}
+                type="button"
+                onClick={() => setActiveSidebarTab('file')}
+                title="File"
+                aria-label="File"
+              >
+                <FolderOpen size={18} />
+                <span>File</span>
+              </button>
+              <button
+                className={`sidebar-tab-button ${activeSidebarTab === 'tools' ? 'is-active' : ''}`}
+                type="button"
+                onClick={() => setActiveSidebarTab('tools')}
+                title="Tools"
+                aria-label="Tools"
+              >
+                <Settings2 size={18} />
+                <span>Tools</span>
+              </button>
             </div>
 
-            <div className="sidebar-section">
-              <span className="sidebar-label">Tools</span>
-              <div className="panel sidebar-panel">
-                <h2>Aksi Dokumen</h2>
-                <div className="button-stack">
-                  <button className="button primary" disabled={isBusy || pages.length === 0} onClick={exportPdf}>
-                    <Save size={18} /> Export PDF
-                  </button>
-                  <button className="button" disabled={isBusy || pages.length === 0} onClick={reverseOrder}>
-                    <RotateCw size={18} /> Balik Urutan
-                  </button>
-                  <button className="button danger" disabled={isBusy || pages.length === 0} onClick={clearAll}>
-                    <Trash2 size={18} /> Bersihkan
-                  </button>
+            <div className="sidebar-content">
+              {activeSidebarTab === 'file' ? (
+                <div className="sidebar-section">
+                  <span className="sidebar-label">File</span>
+                  <div className="panel sidebar-panel">
+                    <h2>Upload PDF</h2>
+                    <p className="sidebar-help">Tambahkan file baru ke workspace seperti panel kiri Canva.</p>
+                    <Dropzone onFilesSelected={addFiles} disabled={isBusy} />
+                  </div>
                 </div>
-              </div>
-            </div>
+              ) : (
+                <div className="sidebar-section">
+                  <span className="sidebar-label">Tools</span>
+                  <div className="panel sidebar-panel">
+                    <h2>Aksi Dokumen</h2>
+                    <div className="button-stack">
+                      <button className="button primary sidebar-tool-button" disabled={isBusy || pages.length === 0} onClick={exportPdf}>
+                        <Save size={18} /> Export PDF
+                      </button>
+                      <button className="button sidebar-tool-button" disabled={isBusy || pages.length === 0} onClick={reverseOrder}>
+                        <RotateCw size={18} /> Balik Urutan
+                      </button>
+                      <button className="button danger sidebar-tool-button" disabled={isBusy || pages.length === 0} onClick={clearAll}>
+                        <Trash2 size={18} /> Bersihkan
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
-            <div className="sidebar-section">
-              <span className="sidebar-label">Status</span>
-              <div className="status-box sidebar-status">
-                <strong>Aktivitas workspace</strong>
-                <p>{status}</p>
+              <div className="sidebar-footer">
+                <span className="sidebar-footer-label">Status</span>
+                <div className="status-box sidebar-status">
+                  <strong>Aktivitas workspace</strong>
+                  <p>{status}</p>
+                </div>
               </div>
             </div>
           </aside>
