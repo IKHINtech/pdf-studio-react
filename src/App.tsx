@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Files, RotateCw, Save, Trash2 } from 'lucide-react';
+import { Files, PanelLeftClose, PanelLeftOpen, RotateCw, Save, Trash2 } from 'lucide-react';
 import { Dropzone } from './components/Dropzone';
 import { PageWorkspace } from './components/PageWorkspace';
 import { downloadBlob } from './lib/download';
@@ -13,6 +13,7 @@ export default function App() {
   const [selectedPageId, setSelectedPageId] = useState<string | null>(null);
   const [annotations, setAnnotations] = useState<PdfAnnotation[]>([]);
   const [isBusy, setIsBusy] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [status, setStatus] = useState('Upload PDF untuk mulai merge dan susun halaman.');
 
   const outputName = useMemo(() => {
@@ -123,6 +124,16 @@ export default function App() {
         </div>
 
         <div className="topbar-actions">
+          <button
+            className="button nav-button nav-button-ghost"
+            type="button"
+            onClick={() => setIsSidebarCollapsed((current) => !current)}
+            title={isSidebarCollapsed ? 'Tampilkan sidebar' : 'Minimize sidebar'}
+            aria-label={isSidebarCollapsed ? 'Tampilkan sidebar' : 'Minimize sidebar'}
+          >
+            {isSidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+            {isSidebarCollapsed ? 'Tampilkan sidebar' : 'Minimize sidebar'}
+          </button>
           <button className="button nav-button" disabled={isBusy || pages.length === 0} onClick={reverseOrder}>
             <RotateCw size={16} /> Balik urutan
           </button>
@@ -133,8 +144,17 @@ export default function App() {
       </header>
 
       <section className="workspace-shell">
-        <section className="workspace editor-layout">
-          <aside className="sidebar compact-sidebar">
+        <section className={`workspace editor-layout ${isSidebarCollapsed ? 'is-sidebar-collapsed' : ''}`}>
+          <aside className={`sidebar compact-sidebar ${isSidebarCollapsed ? 'is-collapsed' : ''}`}>
+            <button
+              className="sidebar-rail-toggle"
+              type="button"
+              onClick={() => setIsSidebarCollapsed((current) => !current)}
+              title={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {isSidebarCollapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+            </button>
             <div className="sidebar-section">
               <span className="sidebar-label">File</span>
               <div className="panel sidebar-panel">

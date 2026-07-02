@@ -1421,6 +1421,10 @@ body {
   border-radius: 14px;
 }
 
+.nav-button-ghost {
+  background: rgba(255, 255, 255, 0.92);
+}
+
 .workspace-shell {
   min-height: 0;
   overflow: hidden;
@@ -1435,46 +1439,94 @@ body {
 
 .editor-layout {
   grid-template-columns: 288px minmax(0, 1fr);
+  transition: grid-template-columns .22s ease;
+}
+
+.workspace.is-sidebar-collapsed,
+.editor-layout.is-sidebar-collapsed {
+  grid-template-columns: 68px minmax(0, 1fr);
 }
 
 .sidebar {
-  top: 84px;
-  gap: 12px;
+  position: sticky;
+  top: 16px;
+  align-self: start;
+  gap: 10px;
   max-height: 100%;
   overflow: auto;
+  padding: 10px;
+  border: 1px solid rgba(191, 219, 254, 0.72);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(239, 246, 255, 0.62));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+  transition: width .22s ease, padding .22s ease;
+  scrollbar-width: thin;
+}
+
+.sidebar-rail-toggle {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(191, 219, 254, 0.95);
+  border-radius: 16px;
+  display: none;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.96);
+  color: #1d4ed8;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.06);
 }
 
 .sidebar-section {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sidebar-label {
   padding: 0 8px;
-  color: #64748b;
-  font-size: 11px;
+  color: #577197;
+  font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.16em;
 }
 
 .sidebar-panel,
 .sidebar-status {
-  border-radius: 22px;
-  background: rgba(255, 255, 255, 0.88);
-  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(203, 213, 225, 0.7);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.05);
 }
 
 .sidebar-panel h2,
 .sidebar-status strong {
   font-size: 16px;
+  letter-spacing: -0.02em;
 }
 
 .sidebar-help {
-  margin: 6px 0 0;
+  margin: 4px 0 0;
   color: #64748b;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.sidebar.is-collapsed {
+  gap: 8px;
+  overflow: hidden;
+  padding: 8px;
+  border-radius: 22px;
+}
+
+.sidebar.is-collapsed .sidebar-rail-toggle {
+  display: grid;
+}
+
+.sidebar.is-collapsed .sidebar-section {
+  display: none;
 }
 
 .content-area {
@@ -1482,6 +1534,46 @@ body {
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(16px);
   box-shadow: 0 28px 60px rgba(15, 23, 42, 0.08);
+}
+
+.sidebar .panel,
+.sidebar .status-box {
+  padding: 14px;
+}
+
+.sidebar .button-stack {
+  margin-top: 12px;
+  gap: 9px;
+}
+
+.sidebar .button {
+  min-height: 46px;
+  border-radius: 15px;
+}
+
+.sidebar .dropzone {
+  margin-top: 12px;
+  min-height: 154px;
+  border-radius: 18px;
+}
+
+.sidebar .dropzone-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.65);
+  border-radius: 999px;
 }
 
 .canva-workspace {
@@ -1595,6 +1687,11 @@ body {
   .editor-layout {
     grid-template-columns: 260px minmax(0, 1fr);
   }
+
+  .workspace.is-sidebar-collapsed,
+  .editor-layout.is-sidebar-collapsed {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 980px) {
@@ -1604,6 +1701,21 @@ body {
 
   .topbar {
     padding: 12px 14px;
+  }
+
+  .sidebar {
+    top: 0;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+
+  .sidebar-rail-toggle {
+    display: none;
   }
 }
 
@@ -1631,8 +1743,22 @@ body {
     padding: 10px;
   }
 
+  .workspace.is-sidebar-collapsed,
+  .editor-layout.is-sidebar-collapsed {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar.is-collapsed {
+    display: none;
+  }
+
   .sidebar-section {
     gap: 6px;
+  }
+
+  .sidebar .panel,
+  .sidebar .status-box {
+    padding: 14px;
   }
 
   .page-strip {
