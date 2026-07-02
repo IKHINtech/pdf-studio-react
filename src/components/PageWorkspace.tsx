@@ -228,78 +228,80 @@ export function PageWorkspace({ pages, selectedPageId, onSelectPage, onChange, o
       <input ref={signatureInputRef} className="hidden-input" type="file" accept="image/png,image/jpeg,.jpg,.jpeg" disabled={disabled} onChange={(event) => { const input = event.currentTarget; void handleImageFiles(input.files, 'signature').finally(() => { input.value = ''; }); }} />
 
       <section className="focus-panel">
-        <div className="focus-toolbar">
-          <div className="focus-title">
-            <p className="eyebrow compact">Preview halaman</p>
-            <h2>Halaman {selectedIndex + 1}</h2>
-            <span title={selectedPage.sourceName}>{selectedPage.sourceName} · halaman asli {selectedPage.pageNumber}</span>
-          </div>
-          <div className="focus-actions">
-            <form
-              className="move-form"
-              onSubmit={(event) => {
-                event.preventDefault();
-                moveSelectedPage();
-              }}
-            >
-              <label htmlFor="move-to-page">Pindah ke</label>
-              <input
-                id="move-to-page"
-                type="number"
-                min="1"
-                max={pages.length}
-                value={targetOrder}
-                disabled={disabled}
-                onChange={(event) => setTargetOrder(event.target.value)}
-                onBlur={moveSelectedPage}
-              />
-              <button className="icon-button" type="submit" disabled={disabled} title="Pindahkan halaman terpilih">
-                <MoveRight size={17} />
+        <div className="focus-header-stack">
+          <div className="focus-toolbar">
+            <div className="focus-title">
+              <p className="eyebrow compact">Preview halaman</p>
+              <h2>Halaman {selectedIndex + 1}</h2>
+              <span title={selectedPage.sourceName}>{selectedPage.sourceName} · halaman asli {selectedPage.pageNumber}</span>
+            </div>
+            <div className="focus-actions">
+              <form
+                className="move-form"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  moveSelectedPage();
+                }}
+              >
+                <label htmlFor="move-to-page">Pindah ke</label>
+                <input
+                  id="move-to-page"
+                  type="number"
+                  min="1"
+                  max={pages.length}
+                  value={targetOrder}
+                  disabled={disabled}
+                  onChange={(event) => setTargetOrder(event.target.value)}
+                  onBlur={moveSelectedPage}
+                />
+                <button className="icon-button" type="submit" disabled={disabled} title="Pindahkan halaman terpilih">
+                  <MoveRight size={17} />
+                </button>
+              </form>
+              <div className="edit-tools" aria-label="Tool edit PDF">
+                <button className="button small" type="button" disabled={disabled} onClick={addTextAnnotation} title="Tambah teks baru">
+                  <Type size={16} /> Teks
+                </button>
+                <button className="button small" type="button" disabled={disabled} onClick={() => imageInputRef.current?.click()} title="Tambah gambar">
+                  <FileImage size={16} /> Gambar
+                </button>
+                <button className="button small" type="button" disabled={disabled} onClick={() => signatureInputRef.current?.click()} title="Tambah tanda tangan">
+                  <PenLine size={16} /> TTD
+                </button>
+              </div>
+              <div className="zoom-control" aria-label="Kontrol zoom preview">
+                <button className="icon-button" type="button" disabled={disabled || zoom <= 0.45} onClick={zoomOut} title="Zoom out">
+                  <Minus size={17} />
+                </button>
+                <button className="zoom-value" type="button" onClick={resetZoom} title="Reset zoom ke 100%">
+                  {Math.round(zoom * 100)}%
+                </button>
+                <button className="icon-button" type="button" disabled={disabled || zoom >= 2.5} onClick={zoomIn} title="Zoom in">
+                  <Plus size={17} />
+                </button>
+                <button className="icon-button" type="button" onClick={resetZoom} title="Reset zoom">
+                  <RotateCcw size={16} />
+                </button>
+              </div>
+              <button className="button small" disabled={disabled} onClick={copySelectedPage} title="Copy halaman aktif beserta teks/gambar/tanda tangan">
+                <Copy size={16} /> Copy page
               </button>
-            </form>
-            <div className="edit-tools" aria-label="Tool edit PDF">
-              <button className="button small" type="button" disabled={disabled} onClick={addTextAnnotation} title="Tambah teks baru">
-                <Type size={16} /> Teks
+              <button className="button small" disabled={disabled} onClick={() => openInsertPicker(selectedIndex)}>
+                <FilePlus2 size={16} /> Sisipkan setelah ini
               </button>
-              <button className="button small" type="button" disabled={disabled} onClick={() => imageInputRef.current?.click()} title="Tambah gambar">
-                <FileImage size={16} /> Gambar
+              <button className="icon-button" disabled={disabled} title="Rotate halaman" onClick={() => rotatePage(selectedPage.id)}>
+                <RotateCw size={17} />
               </button>
-              <button className="button small" type="button" disabled={disabled} onClick={() => signatureInputRef.current?.click()} title="Tambah tanda tangan">
-                <PenLine size={16} /> TTD
+              <button className="icon-button danger" disabled={disabled} title="Hapus halaman" onClick={() => deletePage(selectedPage.id)}>
+                <Trash2 size={17} />
               </button>
             </div>
-            <div className="zoom-control" aria-label="Kontrol zoom preview">
-              <button className="icon-button" type="button" disabled={disabled || zoom <= 0.45} onClick={zoomOut} title="Zoom out">
-                <Minus size={17} />
-              </button>
-              <button className="zoom-value" type="button" onClick={resetZoom} title="Reset zoom ke 100%">
-                {Math.round(zoom * 100)}%
-              </button>
-              <button className="icon-button" type="button" disabled={disabled || zoom >= 2.5} onClick={zoomIn} title="Zoom in">
-                <Plus size={17} />
-              </button>
-              <button className="icon-button" type="button" onClick={resetZoom} title="Reset zoom">
-                <RotateCcw size={16} />
-              </button>
-            </div>
-            <button className="button small" disabled={disabled} onClick={copySelectedPage} title="Copy halaman aktif beserta teks/gambar/tanda tangan">
-              <Copy size={16} /> Copy page
-            </button>
-            <button className="button small" disabled={disabled} onClick={() => openInsertPicker(selectedIndex)}>
-              <FilePlus2 size={16} /> Sisipkan setelah ini
-            </button>
-            <button className="icon-button" disabled={disabled} title="Rotate halaman" onClick={() => rotatePage(selectedPage.id)}>
-              <RotateCw size={17} />
-            </button>
-            <button className="icon-button danger" disabled={disabled} title="Hapus halaman" onClick={() => deletePage(selectedPage.id)}>
-              <Trash2 size={17} />
-            </button>
           </div>
-        </div>
 
-        {selectedAnnotation ? (
-          <AnnotationInspector annotation={selectedAnnotation} onChange={(patch) => patchAnnotation(selectedAnnotation.id, patch)} onDelete={() => deleteAnnotation(selectedAnnotation.id)} />
-        ) : null}
+          {selectedAnnotation ? (
+            <AnnotationInspector annotation={selectedAnnotation} onChange={(patch) => patchAnnotation(selectedAnnotation.id, patch)} onDelete={() => deleteAnnotation(selectedAnnotation.id)} />
+          ) : null}
+        </div>
 
         <FocusedPage
           page={selectedPage}
@@ -345,33 +347,55 @@ export function PageWorkspace({ pages, selectedPageId, onSelectPage, onChange, o
 }
 
 function AnnotationInspector({ annotation, onChange, onDelete }: { annotation: PdfAnnotation; onChange: (patch: Partial<PdfAnnotation>) => void; onDelete: () => void }) {
+  const title = annotation.type === 'text' ? 'Edit teks' : annotation.type === 'signature' ? 'Edit tanda tangan' : 'Edit gambar';
+  const itemLabel = annotation.type === 'text' ? 'Teks' : annotation.type === 'signature' ? 'Tanda tangan' : 'Gambar';
+
   return (
     <div className="annotation-inspector">
-      <strong>{annotation.type === 'text' ? 'Edit teks' : annotation.type === 'signature' ? 'Edit tanda tangan' : 'Edit gambar'}</strong>
-      {annotation.type === 'text' ? (
-        <>
-          <input className="annotation-text-input" value={annotation.text} onChange={(event) => onChange({ text: event.target.value } as Partial<PdfAnnotation>)} />
-          <label>
-            Font
-            <input type="number" min="8" max="96" value={annotation.fontSize} onChange={(event) => onChange({ fontSize: Number(event.target.value) } as Partial<PdfAnnotation>)} />
-          </label>
-          <label>
-            Warna
-            <input type="color" value={annotation.color} onChange={(event) => onChange({ color: event.target.value } as Partial<PdfAnnotation>)} />
-          </label>
-        </>
-      ) : (
-        <span title={annotation.name}>{annotation.name}</span>
-      )}
-      <label>
-        Lebar %
-        <input type="number" min="5" max="100" value={Math.round(annotation.width * 100)} onChange={(event) => onChange({ width: clamp(Number(event.target.value) / 100, 0.05, 1) } as Partial<PdfAnnotation>)} />
-      </label>
-      <label>
-        Tinggi %
-        <input type="number" min="3" max="100" value={Math.round(annotation.height * 100)} onChange={(event) => onChange({ height: clamp(Number(event.target.value) / 100, 0.03, 1) } as Partial<PdfAnnotation>)} />
-      </label>
-      <button className="icon-button danger" type="button" onClick={onDelete} title="Hapus objek edit">
+      <div className="annotation-inspector-head">
+        <div className={`annotation-kind ${annotation.type}`}>
+          {annotation.type === 'text' ? <Type size={14} /> : annotation.type === 'signature' ? <PenLine size={14} /> : <FileImage size={14} />}
+          <span>{itemLabel}</span>
+        </div>
+        <div className="annotation-inspector-copy">
+          <strong>{title}</strong>
+          <small>{annotation.type === 'text' ? 'Atur isi, font, warna, dan proporsi objek.' : 'Atur proporsi objek yang sedang dipilih.'}</small>
+        </div>
+      </div>
+
+      <div className="annotation-inspector-fields">
+        {annotation.type === 'text' ? (
+          <>
+            <label className="annotation-field annotation-field-text">
+              <span>Teks</span>
+              <input className="annotation-text-input" value={annotation.text} onChange={(event) => onChange({ text: event.target.value } as Partial<PdfAnnotation>)} />
+            </label>
+            <label className="annotation-field annotation-field-number">
+              <span>Font</span>
+              <input type="number" min="8" max="96" value={annotation.fontSize} onChange={(event) => onChange({ fontSize: Number(event.target.value) } as Partial<PdfAnnotation>)} />
+            </label>
+            <label className="annotation-field annotation-field-color">
+              <span>Warna</span>
+              <input type="color" value={annotation.color} onChange={(event) => onChange({ color: event.target.value } as Partial<PdfAnnotation>)} />
+            </label>
+          </>
+        ) : (
+          <div className="annotation-asset-name" title={annotation.name}>
+            {annotation.name}
+          </div>
+        )}
+
+        <label className="annotation-field annotation-field-number">
+          <span>Lebar %</span>
+          <input type="number" min="5" max="100" value={Math.round(annotation.width * 100)} onChange={(event) => onChange({ width: clamp(Number(event.target.value) / 100, 0.05, 1) } as Partial<PdfAnnotation>)} />
+        </label>
+        <label className="annotation-field annotation-field-number">
+          <span>Tinggi %</span>
+          <input type="number" min="3" max="100" value={Math.round(annotation.height * 100)} onChange={(event) => onChange({ height: clamp(Number(event.target.value) / 100, 0.03, 1) } as Partial<PdfAnnotation>)} />
+        </label>
+      </div>
+
+      <button className="icon-button danger annotation-delete-button" type="button" onClick={onDelete} title="Hapus objek edit">
         <Trash2 size={16} />
       </button>
     </div>

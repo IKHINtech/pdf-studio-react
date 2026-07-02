@@ -15,13 +15,13 @@ export default function App() {
   const [isBusy, setIsBusy] = useState(false);
   const [status, setStatus] = useState('Upload PDF untuk mulai merge dan susun halaman.');
 
-  const totalPages = pages.length;
-  const totalFiles = sources.length;
   const outputName = useMemo(() => {
-    if (totalFiles === 0) return 'merged.pdf';
+    if (sources.length === 0) return 'merged.pdf';
     const firstName = sources[0]?.name.replace(/\.pdf$/i, '') || 'merged';
     return `${firstName}-edited.pdf`;
-  }, [sources, totalFiles]);
+  }, [sources]);
+  const totalPages = pages.length;
+  const totalFiles = sources.length;
 
   useEffect(() => {
     if (pages.length === 0) {
@@ -100,66 +100,97 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <header className="hero compact-hero">
-        <div>
-          <p className="eyebrow">PDF Studio</p>
-          <h1>Editor PDF ala Canva</h1>
-          <p className="hero-copy">Fokus ke satu halaman besar, lalu susun urutan halaman dari timeline bawah. Semua proses berjalan langsung di browser.</p>
+      <header className="topbar">
+        <div className="topbar-brand">
+          <div className="topbar-logo">
+            <Files size={18} />
+          </div>
+          <div className="topbar-copy">
+            <strong>PDF Studio</strong>
+            <span>{sources[0]?.name ?? 'Workspace baru'}</span>
+          </div>
         </div>
-        <div className="hero-card">
-          <span><Files size={20} /> {totalFiles} file</span>
-          <strong>{totalPages}</strong>
-          <small>halaman aktif</small>
+
+        <div className="topbar-meta" aria-label="Ringkasan dokumen">
+          <div className="topbar-pill">
+            <span>File</span>
+            <strong>{totalFiles}</strong>
+          </div>
+          <div className="topbar-pill">
+            <span>Halaman</span>
+            <strong>{totalPages}</strong>
+          </div>
+        </div>
+
+        <div className="topbar-actions">
+          <button className="button nav-button" disabled={isBusy || pages.length === 0} onClick={reverseOrder}>
+            <RotateCw size={16} /> Balik urutan
+          </button>
+          <button className="button primary nav-button" disabled={isBusy || pages.length === 0} onClick={exportPdf}>
+            <Save size={16} /> Export PDF
+          </button>
         </div>
       </header>
 
-      <section className="workspace editor-layout">
-        <aside className="sidebar compact-sidebar">
-          <div className="panel">
-            <h2>Upload PDF</h2>
-            <Dropzone onFilesSelected={addFiles} disabled={isBusy} />
-          </div>
-
-          <div className="panel">
-            <h2>Aksi Dokumen</h2>
-            <div className="button-stack">
-              <button className="button primary" disabled={isBusy || pages.length === 0} onClick={exportPdf}>
-                <Save size={18} /> Export PDF
-              </button>
-              <button className="button" disabled={isBusy || pages.length === 0} onClick={reverseOrder}>
-                <RotateCw size={18} /> Balik Urutan
-              </button>
-              <button className="button danger" disabled={isBusy || pages.length === 0} onClick={clearAll}>
-                <Trash2 size={18} /> Bersihkan
-              </button>
+      <section className="workspace-shell">
+        <section className="workspace editor-layout">
+          <aside className="sidebar compact-sidebar">
+            <div className="sidebar-section">
+              <span className="sidebar-label">File</span>
+              <div className="panel sidebar-panel">
+                <h2>Upload PDF</h2>
+                <p className="sidebar-help">Tambahkan file baru ke workspace seperti panel kiri Canva.</p>
+                <Dropzone onFilesSelected={addFiles} disabled={isBusy} />
+              </div>
             </div>
-          </div>
 
-          <div className="status-box">
-            <strong>Status</strong>
-            <p>{status}</p>
-          </div>
-        </aside>
-
-        <section className="content-area editor-area">
-          {pages.length === 0 ? (
-            <div className="empty-state">
-              <Files size={44} />
-              <h3>Belum ada PDF</h3>
-              <p>Upload satu atau beberapa file PDF. Setelah itu editor akan menampilkan satu halaman besar dan timeline halaman di bawahnya.</p>
+            <div className="sidebar-section">
+              <span className="sidebar-label">Tools</span>
+              <div className="panel sidebar-panel">
+                <h2>Aksi Dokumen</h2>
+                <div className="button-stack">
+                  <button className="button primary" disabled={isBusy || pages.length === 0} onClick={exportPdf}>
+                    <Save size={18} /> Export PDF
+                  </button>
+                  <button className="button" disabled={isBusy || pages.length === 0} onClick={reverseOrder}>
+                    <RotateCw size={18} /> Balik Urutan
+                  </button>
+                  <button className="button danger" disabled={isBusy || pages.length === 0} onClick={clearAll}>
+                    <Trash2 size={18} /> Bersihkan
+                  </button>
+                </div>
+              </div>
             </div>
-          ) : (
-            <PageWorkspace
-              pages={pages}
-              selectedPageId={selectedPageId}
-              onSelectPage={setSelectedPageId}
-              onChange={setPages}
-              onInsertAfter={insertFilesAfter}
-              annotations={annotations}
-              onAnnotationsChange={setAnnotations}
-              disabled={isBusy}
-            />
-          )}
+
+            <div className="sidebar-section">
+              <span className="sidebar-label">Status</span>
+              <div className="status-box sidebar-status">
+                <strong>Aktivitas workspace</strong>
+                <p>{status}</p>
+              </div>
+            </div>
+          </aside>
+
+          <section className="content-area editor-area">
+            {pages.length === 0 ? (
+              <div className="empty-state">
+                <Files size={44} />
+                <h3>Belum ada PDF</h3>
+                <p>Upload satu atau beberapa file PDF. Setelah itu editor akan menampilkan satu halaman besar dan timeline halaman di bawahnya.</p>
+              </div>
+            ) : (
+              <PageWorkspace
+                pages={pages}
+                selectedPageId={selectedPageId}
+                onSelectPage={setSelectedPageId}
+                onChange={setPages}
+                onInsertAfter={insertFilesAfter}
+                annotations={annotations}
+                onAnnotationsChange={setAnnotations}
+                disabled={isBusy}
+              />
+            )}
+          </section>
         </section>
       </section>
     </main>
