@@ -11,10 +11,17 @@
 
 * { box-sizing: border-box; }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  overflow: hidden;
   background:
     radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 32rem),
     linear-gradient(180deg, #f8fafc, #eef2ff);
@@ -1312,9 +1319,10 @@ body {
 }
 
 .app-shell {
-  min-height: 100vh;
+  height: 100dvh;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
 }
 
 .topbar {
@@ -1415,6 +1423,7 @@ body {
 
 .workspace-shell {
   min-height: 0;
+  overflow: hidden;
   padding: 16px;
 }
 
@@ -1431,6 +1440,8 @@ body {
 .sidebar {
   top: 84px;
   gap: 12px;
+  max-height: 100%;
+  overflow: auto;
 }
 
 .sidebar-section {
@@ -1484,10 +1495,8 @@ body {
 
 .focused-page-stage {
   background:
-    linear-gradient(90deg, rgba(148, 163, 184, 0.14) 1px, transparent 1px),
-    linear-gradient(rgba(148, 163, 184, 0.14) 1px, transparent 1px),
-    linear-gradient(180deg, #e7edf7, #dde6f4);
-  background-size: 24px 24px;
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.65), transparent 44%),
+    linear-gradient(180deg, #edf3fb 0%, #e3ebf6 100%);
 }
 
 .timeline-panel {
@@ -1638,4 +1647,35 @@ body {
     height: 108px;
     padding: 8px;
   }
+}
+
+/* V10: timeline strip harus nempel ke bawah area editor. */
+.workspace-shell {
+  height: 100%;
+}
+
+.workspace,
+.editor-layout {
+  min-height: 0;
+  height: 100%;
+  align-items: stretch;
+}
+
+.content-area,
+.editor-area {
+  min-height: 0;
+  height: 100%;
+}
+
+.editor-area {
+  display: flex;
+  flex-direction: column;
+}
+
+.canva-workspace {
+  flex: 1 1 auto;
+}
+
+.timeline-panel {
+  margin-top: auto;
 }
